@@ -1,8 +1,11 @@
 [package]
 name = "llvm-embedded-coverage"
 version = "0.1.0"
+authors = ["Daniel McKenna <danielmckenna93@gmail.com>"]
+description = "Use llvm coverage instrumentation on embedded targets"
+repository = "https://github.com/xd009642/llvm-embedded-coverage"
+readme = "README.md"
+license = "MIT/Apache-2.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]

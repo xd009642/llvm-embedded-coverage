@@ -12,7 +12,7 @@ pub static __llvm_profile_runtime: i32 = 0;
 extern "C" {
     fn __llvm_profile_get_size_for_buffer() -> u64;
 
-    fn __llvm_profile_write_buffer(buffer: *mut char) -> i32;
+    fn __llvm_profile_write_buffer(buffer: *mut u8) -> i32;
 }
 
 
@@ -26,7 +26,7 @@ fn main() {
     }
 
     let output = unsafe {
-        let res = __llvm_profile_write_buffer(buffer.as_mut_ptr() as *mut char);
+        let res = __llvm_profile_write_buffer(buffer.as_mut_ptr() as *mut u8);
         println!("Buffer write {}", res);
         MaybeUninit::slice_assume_init_ref(&buffer[..length])
     };
