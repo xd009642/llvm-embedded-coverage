@@ -5,6 +5,12 @@ Rust. Currently, this just uses the external llvm symbols required to not write
 to a file so we can transfer coverage along some other medium. And then it just
 writes it to a file anyway, just to make sure it works.
 
+To run this simple example with a recent nightly compiler:
+
+```
+RUSTFLAGS="-Z instrument-coverage" cargo +nightly run
+```
+
 If we then take the default.profraw that is written and use the profdata binary
 to parse it with the show command and `--all-functions` we can see the
 following printout:
