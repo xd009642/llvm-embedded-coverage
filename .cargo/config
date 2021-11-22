@@ -10,3 +10,4 @@ rustflags = [
 [build]
 # cross compilation target = ARM Cortex-M4F
 target = "thumbv7em-none-eabihf"
+profiler = true
