@@ -14,3 +14,4 @@ alloc = []
 
 [dependencies]
 cfg-if = "1.0.0"
+rtt-target = "0.3.1"

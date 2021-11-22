@@ -1,8 +1,11 @@
 //! https://clang.llvm.org/docs/SourceBasedCodeCoverage.html
+#![no_std]
 #![feature(maybe_uninit_slice)]
 #![feature(maybe_uninit_uninit_array)]
 use core::mem::MaybeUninit;
-use std::fs::write;
+use core::fmt::Write;
+use rtt_target::rtt_init;
+
 
 #[allow(dead_code)]
 mod constants {
@@ -24,6 +27,16 @@ extern "C" {
 fn main() {
     let length = unsafe { __llvm_profile_get_size_for_buffer()} as usize;
 
+    let channels = rtt_init! {
+        cov: {
+            0: {
+                size: length,
+                mode: BlockIfFull, // we're only going to write at the end before stopping
+                name: "coverage"
+            }
+        }
+    };
+
     cfg_if::cfg_if! {
         if #[cfg(feature = "alloc")] {
             let mut buffer = Vec::<MaybeUninit<u8>>::new();
@@ -38,11 +51,10 @@ fn main() {
 
     let output = unsafe {
         let res = __llvm_profile_write_buffer(buffer.as_mut_ptr() as *mut u8);
-        println!("Buffer write {}", res);
         MaybeUninit::slice_assume_init_ref(&buffer[..length])
     };
 
-   
-    write("default.profraw", &output).unwrap();
+    let mut tx = channels.cov.0;
+    write!(tx, &output).unwrap();
 
 }
