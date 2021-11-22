@@ -7,5 +7,10 @@ repository = "https://github.com/xd009642/llvm-embedded-coverage"
 readme = "README.md"
 license = "MIT/Apache-2.0"
 edition = "2021"
+build = "build.rs"
+
+[features]
+alloc = []
 
 [dependencies]
+cfg-if = "1.0.0"
