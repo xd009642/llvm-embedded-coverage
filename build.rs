@@ -7,9 +7,11 @@ fn main() {
         .map(|x| x.parse::<usize>().unwrap_or(1024))
         .unwrap_or(1024);
 
-    let output = Path::new(&env::var_os("OUT_DIR").unwrap())
-        .join("constants.rs");
+    let output = Path::new(&env::var_os("OUT_DIR").unwrap()).join("constants.rs");
 
-    fs::write(&output, format!("pub const COVERAGE_BUFFER_SIZE: usize = {};", size)).unwrap();
-    
+    fs::write(
+        &output,
+        format!("pub const COVERAGE_BUFFER_SIZE: usize = {};", size),
+    )
+    .unwrap();
 }

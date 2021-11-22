@@ -1,11 +1,12 @@
 //! https://clang.llvm.org/docs/SourceBasedCodeCoverage.html
 #![no_std]
+#![no_main]
 #![feature(maybe_uninit_slice)]
 #![feature(maybe_uninit_uninit_array)]
 use core::mem::MaybeUninit;
-use core::fmt::Write;
+use cortex_m_rt::entry;
+use panic_halt as _;
 use rtt_target::rtt_init;
-
 
 #[allow(dead_code)]
 mod constants {
@@ -22,16 +23,15 @@ extern "C" {
     fn __llvm_profile_write_buffer(buffer: *mut u8) -> i32;
 }
 
+#[entry]
+fn main() -> ! {
+    let length = unsafe { __llvm_profile_get_size_for_buffer() } as usize;
 
-
-fn main() {
-    let length = unsafe { __llvm_profile_get_size_for_buffer()} as usize;
-
-    let channels = rtt_init! {
-        cov: {
+    let mut channels = rtt_init! {
+        up: {
             0: {
-                size: length,
-                mode: BlockIfFull, // we're only going to write at the end before stopping
+                size: 1024
+                mode: BlockIfFull // we're only going to write at the end before stopping
                 name: "coverage"
             }
         }
@@ -47,14 +47,13 @@ fn main() {
                 panic!("Buffer too small {}>{}", length, constants::COVERAGE_BUFFER_SIZE);
             }
         }
-    } 
+    }
 
     let output = unsafe {
-        let res = __llvm_profile_write_buffer(buffer.as_mut_ptr() as *mut u8);
+        let _res = __llvm_profile_write_buffer(buffer.as_mut_ptr() as *mut u8);
         MaybeUninit::slice_assume_init_ref(&buffer[..length])
     };
 
-    let mut tx = channels.cov.0;
-    write!(tx, &output).unwrap();
-
+    let x = channels.up.0.write(&output);
+    panic!("Failed to write everything. {}<{}", x, length);
 }
