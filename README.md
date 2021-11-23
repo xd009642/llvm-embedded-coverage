@@ -5,18 +5,13 @@ Rust. Currently, this just uses the external llvm symbols required to not write
 to a file so we can transfer coverage along some other medium. And then it just
 writes it to a file anyway, just to make sure it works.
 
-~~To run this simple example with a recent nightly compiler:~~
+To run this simple example with a recent nightly compiler:
 
 ```
-~~RUSTFLAGS="-Z instrument-coverage" cargo +nightly run~~
+RUSTFLAGS="-Zinstrument-coverage -Zno-profiler-runtime" cargo +nightly run
 ```
 
-So going off https://jbp.io/2017/07/19/measuring-test-coverage-of-rust-programs
-I have adapted to:
-
-```
-CARGO_INCREMENTAL=0 RUSTC_WRAPPER="$PWD/rustc_wrapper" cargo +nightly embed
-```
+This doesn't currently work. But work is underway
 
 This is also using cargo-embed, fuse-link and cargo-flash. So look up how to
 install them and their dependencies.

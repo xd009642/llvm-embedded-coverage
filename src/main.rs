@@ -1,31 +1,19 @@
 //! https://clang.llvm.org/docs/SourceBasedCodeCoverage.html
 #![no_std]
 #![no_main]
-#![feature(maybe_uninit_slice)]
-#![feature(maybe_uninit_uninit_array)]
-use core::mem::MaybeUninit;
 use cortex_m_rt::entry;
 use panic_halt as _;
 use rtt_target::rtt_init;
+
 
 #[allow(dead_code)]
 mod constants {
     include!(concat!(env!("OUT_DIR"), "/constants.rs"));
 }
 
-#[no_mangle]
-#[used]
-pub static __llvm_profile_runtime: i32 = 0;
-
-extern "C" {
-    fn __llvm_profile_get_size_for_buffer() -> u64;
-
-    fn __llvm_profile_write_buffer(buffer: *mut u8) -> i32;
-}
-
 #[entry]
 fn main() -> ! {
-    let length = unsafe { __llvm_profile_get_size_for_buffer() } as usize;
+    let length = minicov::get_coverage_data_size();
 
     let mut channels = rtt_init! {
         up: {
@@ -39,20 +27,16 @@ fn main() -> ! {
 
     cfg_if::cfg_if! {
         if #[cfg(feature = "alloc")] {
-            let mut buffer = Vec::<MaybeUninit<u8>>::new();
-            buffer.resize(length, MaybeUninit::uninit());
+            let output = minicov::capture_coverage();
         } else {
-            let mut buffer: [MaybeUninit<u8>; constants::COVERAGE_BUFFER_SIZE] = MaybeUninit::uninit_array();
+            let mut buffer: [u8; constants::COVERAGE_BUFFER_SIZE] = [0; constants::COVERAGE_BUFFER_SIZE];
             if length > constants::COVERAGE_BUFFER_SIZE {
                 panic!("Buffer too small {}>{}", length, constants::COVERAGE_BUFFER_SIZE);
             }
+            minicov::capture_coverage_to_buffer(&mut buffer[..length]);
+            let output = &buffer[..length];
         }
     }
-
-    let output = unsafe {
-        let _res = __llvm_profile_write_buffer(buffer.as_mut_ptr() as *mut u8);
-        MaybeUninit::slice_assume_init_ref(&buffer[..length])
-    };
 
     let x = channels.up.0.write(&output);
     panic!("Failed to write everything. {}<{}", x, length);
