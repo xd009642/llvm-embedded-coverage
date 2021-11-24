@@ -1,5 +1,5 @@
 [target.thumbv7em-none-eabihf]
-runner = "probe-run --chip nRF52840_xxAA --probe 1366:1015"
+runner = "probe-run --chip STM32F469NIHx --probe 1366:1015"
 rustflags = [
   "-C", "link-arg=-Tlink.x",  # required by cortex-m-rt
   "-C", "link-arg=-Tdefmt.x", # defmt logs
